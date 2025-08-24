@@ -1,1 +1,78 @@
 @import "tailwindcss";
+
+
+:root {
+  /* Light Theme */
+  --light-bg: linear-gradient(to bottom right, #f0f9ff, #e0f2fe);
+  --light-card: #ffffff;
+  --light-text: #1f2937;
+  --light-input: #ffffff;
+  --light-button: linear-gradient(to right, #3b82f6, #2563eb);
+  --light-accent: #3b82f6;
+  --light-header: linear-gradient(to right, #1d4ed8, #1e40af);
+  --light-sidebar: linear-gradient(to bottom, #f0f9ff, #e0f2fe);
+  
+  /* Dark Theme */
+  --dark-bg: linear-gradient(to bottom right, #111827, #1f2937);
+  --dark-card: #374151;
+  --dark-text: #f9fafb;
+  --dark-input: #4b5563;
+  --dark-button: linear-gradient(to right, #4f46e5, #3730a3);
+  --dark-accent: #818cf8;
+  --dark-header: linear-gradient(to right, #111827, #1f2937);
+  --dark-sidebar: linear-gradient(to bottom, #111827, #1f2937);
+}
+
+.light {
+  --bg: var(--light-bg);
+  --card: var(--light-card);
+  --text: var(--light-text);
+  --input: var(--light-input);
+  --button: var(--light-button);
+  --accent: var(--light-accent);
+  --header: var(--light-header);
+  --sidebar: var(--light-sidebar);
+}
+
+.dark {
+  --bg: var(--dark-bg);
+  --card: var(--dark-card);
+  --text: var(--dark-text);
+  --input: var(--dark-input);
+  --button: var(--dark-button);
+  --accent: var(--dark-accent);
+  --header: var(--dark-header);
+  --sidebar: var(--dark-sidebar);
+}
+
+
+
+
+
+
+
+
+/* Custom thin scrollbar for sidebar */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth transitions for all elements */
+.sidebar * {
+  transition-property: color, background-color, transform, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
