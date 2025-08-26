@@ -21,6 +21,12 @@
   --dark-accent: #818cf8;
   --dark-header: linear-gradient(to right, #111827, #1f2937);
   --dark-sidebar: linear-gradient(to bottom, #111827, #1f2937);
+
+  
+  --priority-high: #f87171;
+  --priority-medium: #fbbf24;
+  --priority-low: #60a5fa;
+
 }
 
 .light {
@@ -75,4 +81,50 @@
   transition-property: color, background-color, transform, box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+@media (max-width: 1280px) {
+  .grid-container {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid-container {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }

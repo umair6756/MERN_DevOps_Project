@@ -1,3 +1,5 @@
+import * as FiIcons from "react-icons/fi";
+
 export const categories = [
   { id: 1, name: 'Personal', color: 'blue', icon: 'FiUser' },
   { id: 2, name: 'Work', color: 'green', icon: 'FiBriefcase' },

@@ -1,5 +1,15 @@
+
+
+
+
+
+
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import TodoList from '../components/TodoList';
@@ -8,21 +18,27 @@ import SettingsPanel from '../components/SettingsPanel';
 import AddTodoButton from '../components/AddTodoButton';
 import PomodoroTimer from '../components/PomodoroTimer';
 import { categories, tags } from '../icons/categories';
-// import '../App.css';
+import axios from 'axios';
 
-import { themes } from '../icons/theme';
+// API base URL
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 const TodoHome = () => {
-  const [todos, setTodos] = useState(() => {
-    const saved = localStorage.getItem('todos');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-
-
-
-
-  
-  
+  const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [editId, setEditId] = useState(null);
   const [editValue, setEditValue] = useState('');
@@ -77,104 +93,55 @@ const TodoHome = () => {
   const [timerActive, setTimerActive] = useState(false);
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Save to localStorage whenever todos or theme changes
+  // Check if user is authenticated
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (!token || !user) {
+      window.location.href = '/';
+      return;
+    }
+    
+    fetchTodos();
+  }, []);
 
+  // Fetch todos from backend
+  const fetchTodos = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/tasks');
+      setTodos(response.data);
+      calculateProductivityScore(response.data);
+      checkAchievements(response.data);
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        toast.error('Failed to load tasks');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Save to localStorage whenever theme changes
   useEffect(() => {
     localStorage.setItem("theme", theme);
-
-    // remove both then add one (cleaner than toggle)
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(theme);
   }, [theme]);
 
-  // Initialize with sample todos if empty
+  // Fetch todos on component mount
   useEffect(() => {
-    if (todos.length === 0) {
-      const sampleTodos = [
-        {
-          id: 1,
-          text: 'Welcome to your advanced todo app',
-          completed: false,
-          priority: 'high',
-          date: new Date(),
-          tag: 'work',
-          dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-          notes: 'This is a sample todo to get you started. Try out all the advanced features!',
-          category: 'Work',
-          isPrivate: false,
-          isFavorite: true,
-          isArchived: false,
-          timeSpent: 0,
-          estimatedTime: 30,
-          reminderTime: '09:00',
-          recurring: 'none',
-          attachments: [],
-          collaborators: [],
-          energyRequired: 3,
-          subtasks: [
-            { id: 1, text: 'Explore features', completed: true },
-            { id: 2, text: 'Customize settings', completed: false },
-            { id: 3, text: 'Add your first task', completed: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Click on the + button to add a new todo',
-          completed: false,
-          priority: 'medium',
-          date: new Date(),
-          tag: 'personal',
-          dueDate: new Date(Date.now() + 172800000).toISOString().split('T')[0],
-          notes: 'You can add detailed notes, set priorities, categories and more!',
-          category: 'Personal',
-          isPrivate: false,
-          isFavorite: false,
-          isArchived: false,
-          timeSpent: 0,
-          estimatedTime: 15,
-          reminderTime: '',
-          recurring: 'none',
-          attachments: [],
-          collaborators: [],
-          energyRequired: 2,
-          subtasks: []
-        },
-        {
-          id: 3,
-          text: 'Try out the advanced filtering system',
-          completed: false,
-          priority: 'high',
-          date: new Date(),
-          tag: 'learning',
-          dueDate: new Date(Date.now() + 259200000).toISOString().split('T')[0],
-          notes: 'Filter by priority, due date, tags, categories and more!',
-          category: 'Education',
-          isPrivate: false,
-          isFavorite: true,
-          isArchived: false,
-          timeSpent: 0,
-          estimatedTime: 20,
-          reminderTime: '14:00',
-          recurring: 'none',
-          attachments: [],
-          collaborators: [],
-          energyRequired: 3,
-          subtasks: [
-            { id: 1, text: 'Test priority filters', completed: false },
-            { id: 2, text: 'Try category filters', completed: false }
-          ]
-        }
-      ];
-      setTodos(sampleTodos);
-    }
-    
-    calculateProductivityScore(todos);
-    checkAchievements(todos);
-  }, []);
+    fetchTodos();
+  }, [fetchTodos]);
 
   // Calculate productivity score
   const calculateProductivityScore = useCallback((todosArray) => {
@@ -229,7 +196,6 @@ const TodoHome = () => {
       });
     }
     
-    // Add more achievements here
     if (completedCount >= 20) {
       newAchievements.push({
         id: 3,
@@ -245,44 +211,10 @@ const TodoHome = () => {
     setAchievements(newAchievements);
   }, []);
 
-  // Add a new todo
-  const addTodo = () => {
-    if (inputValue.trim() !== '') {
-      const newTodo = {
-        id: Date.now(),
-        text: inputValue,
-        completed: false,
-        priority,
-        date: new Date(),
-        tag: selectedTag,
-        dueDate,
-        notes,
-        category: selectedCategory,
-        isPrivate,
-        isFavorite,
-        isArchived: false,
-        timeSpent: 0,
-        estimatedTime: timeEstimate,
-        reminderTime,
-        recurring,
-        attachments,
-        collaborators,
-        energyRequired: energyLevel,
-        subtasks: []
-      };
-      
-      setTodos([newTodo, ...todos]);
-      resetForm();
-      setIsFormOpen(false);
-      
-      calculateProductivityScore([newTodo, ...todos]);
-      checkAchievements([newTodo, ...todos]);
-    }
-  };
-
   // Reset form fields
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setInputValue('');
+    setEditValue('');
     setPriority('medium');
     setSelectedTag('');
     setDueDate('');
@@ -296,82 +228,179 @@ const TodoHome = () => {
     setAttachments([]);
     setCollaborators([]);
     setEnergyLevel(3);
-    setShowAdvancedOptions(false);
-  };
+  }, []);
 
-  // Edit a todo
-  const updateTodo = () => {
-    if (editValue.trim() !== '') {
-      const updatedTodos = todos.map(todo =>
-        todo.id === editId
-          ? { 
-            ...todo, 
-            text: editValue, 
-            priority, 
-            tag: selectedTag, 
-            dueDate,
-            notes,
-            category: selectedCategory,
-            isPrivate,
-            isFavorite,
-            reminderTime,
-            recurring,
-            estimatedTime: timeEstimate,
-            attachments,
-            collaborators,
-            energyRequired: energyLevel
-          }
-          : todo
-      );
-      
-      setTodos(updatedTodos);
-      setEditId(null);
-      resetForm();
-      
-      calculateProductivityScore(updatedTodos);
-      checkAchievements(updatedTodos);
+  // Add a new todo to backend
+  const addTodo = async () => {
+    if (inputValue.trim() !== '') {
+      try {
+        const newTodo = {
+          text: inputValue,
+          priority,
+          tag: selectedTag,
+          dueDate,
+          notes,
+          category: selectedCategory,
+          isPrivate,
+          isFavorite,
+          estimatedTime: timeEstimate,
+          reminderTime,
+          recurring,
+          energyRequired: energyLevel,
+        };
+        
+        const response = await api.post('/tasks', newTodo);
+        setTodos([response.data, ...todos]);
+        resetForm();
+        setIsFormOpen(false);
+        
+        calculateProductivityScore([response.data, ...todos]);
+        checkAchievements([response.data, ...todos]);
+        
+        toast.success('Task added successfully!');
+      } catch (error) {
+        console.error('Error adding todo:', error);
+        if (error.response?.status === 500) {
+          toast.error('Server error. Please try again later.');
+        } else {
+          toast.error('Failed to add task');
+        }
+      }
     }
   };
 
-  // Delete a todo
-  const deleteTodo = id => {
-    const updatedTodos = todos.filter(todo => todo.id !== id);
-    setTodos(updatedTodos);
-    calculateProductivityScore(updatedTodos);
+  // Update a todo on backend
+  const updateTodo = async () => {
+    if (editValue.trim() !== '') {
+      try {
+        const updatedTodo = {
+          text: editValue,
+          priority,
+          tag: selectedTag,
+          dueDate,
+          notes,
+          category: selectedCategory,
+          isPrivate,
+          isFavorite,
+          reminderTime,
+          recurring,
+          estimatedTime: timeEstimate,
+          energyRequired: energyLevel
+        };
+        
+        const response = await api.put(`/tasks/${editId}`, updatedTodo);
+        const updatedTodos = todos.map(todo =>
+          todo._id === editId ? response.data : todo
+        );
+        
+        setTodos(updatedTodos);
+        setEditId(null);
+        resetForm();
+        setIsFormOpen(false);
+        
+        calculateProductivityScore(updatedTodos);
+        checkAchievements(updatedTodos);
+        
+        toast.success('Task updated successfully!');
+      } catch (error) {
+        console.error('Error updating todo:', error);
+        toast.error('Failed to update task');
+      }
+    }
   };
 
-  // Toggle completion status
-  const toggleComplete = id => {
+  // Delete a todo from backend
+  const deleteTodo = async (id) => {
+    try {
+      const response = await api.delete(`/tasks/${id}`);
+      const updatedTodos = todos.filter(todo => todo._id !== id);  // ✅ instead of todo.id
+
+      setTodos(updatedTodos);
+      calculateProductivityScore(updatedTodos);
+
+      console.log("Deleting todo with id: ", id);
+
+      
+      toast.success('Task deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      toast.error('Failed to delete task');
+    }
+  };
+
+
+
+// Toggle completion status on backend
+const toggleComplete = async (id) => {
+  try {
+    const response = await api.patch(`/tasks/${id}/toggle`);
+    
     const updatedTodos = todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      todo._id === id ? response.data : todo
     );
     
     setTodos(updatedTodos);
     calculateProductivityScore(updatedTodos);
     checkAchievements(updatedTodos);
-  };
+  } catch (error) {
+    console.error('Error toggling todo:', error);
+    
+    // More detailed error message
+    if (error.response?.data?.message) {
+      toast.error(`Failed to update task: ${error.response.data.message}`);
+    } else {
+      toast.error('Failed to update task');
+    }
+  }
+};
 
-  // Archive a todo
-  const archiveTodo = id => {
+// Archive a todo
+const archiveTodo = async (id) => {
+  try {
+    const response = await api.patch(`/tasks/${id}/archive`);
+    
     const updatedTodos = todos.map(todo =>
-      todo.id === id ? { ...todo, isArchived: !todo.isArchived } : todo
+      todo._id === id ? response.data : todo
     );
     
     setTodos(updatedTodos);
-  };
+    toast.success('Task archived successfully!');
+  } catch (error) {
+    console.error('Error archiving todo:', error);
+    
+    // More detailed error message
+    if (error.response?.data?.message) {
+      toast.error(`Failed to archive task: ${error.response.data.message}`);
+    } else {
+      toast.error('Failed to archive task');
+    }
+  }
+};
 
-  // Toggle favorite status
-  const toggleFavorite = id => {
+// Toggle favorite status on backend
+const toggleFavorite = async (id) => {
+  try {
+    const response = await api.patch(`/tasks/${id}/favorite`);
+    
     const updatedTodos = todos.map(todo =>
-      todo.id === id ? { ...todo, isFavorite: !todo.isFavorite } : todo
+      todo._id === id ? response.data : todo
     );
     
     setTodos(updatedTodos);
-  };
-
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    
+    // More detailed error message
+    if (error.response?.data?.message) {
+      toast.error(`Failed to update favorite: ${error.response.data.message}`);
+    } else {
+      toast.error('Failed to update favorite status');
+    }
+  }
+};
   // Start editing a todo
-  const startEdit = todo => {
-    setEditId(todo.id);
+  const startEdit = (todo) => {
+    setEditId(todo._id);
     setEditValue(todo.text);
     setPriority(todo.priority || 'medium');
     setSelectedTag(todo.tag || '');
@@ -393,68 +422,79 @@ const TodoHome = () => {
   const cancelEdit = () => {
     setEditId(null);
     resetForm();
+    setIsFormOpen(false);
   };
 
   // Clear all completed todos
-  const clearCompleted = () => {
-    const updatedTodos = todos.filter(todo => !todo.completed);
-    setTodos(updatedTodos);
-    calculateProductivityScore(updatedTodos);
+  const clearCompleted = async () => {
+    try {
+      // Get all completed todos
+      const completedTodos = todos.filter(todo => todo.completed);
+      
+      // Delete each completed todo
+      for (const todo of completedTodos) {
+        await api.delete(`/tasks/${todo._id}`);
+      }
+      
+      // Update local state
+      const updatedTodos = todos.filter(todo => !todo.completed);
+      setTodos(updatedTodos);
+      calculateProductivityScore(updatedTodos);
+      
+      toast.success('Completed tasks cleared successfully!');
+    } catch (error) {
+      console.error('Error clearing completed todos:', error);
+      toast.error('Failed to clear completed tasks');
+    }
   };
 
   // Add a subtask
-  const addSubtask = (todoId, text) => {
+  const addSubtask = async (todoId, text) => {
     if (text.trim() !== '') {
-      const updatedTodos = todos.map(todo =>
-        todo.id === todoId
-          ? {
-            ...todo,
-            subtasks: [
-              ...todo.subtasks,
-              {
-                id: Date.now(),
-                text,
-                completed: false
-              }
-            ]
-          }
-          : todo
-      );
-      
-      setTodos(updatedTodos);
+      try {
+        const response = await api.post(`/tasks/${todoId}/subtasks`, { text });
+        const updatedTodos = todos.map(todo =>
+          todo._id === todoId ? response.data : todo
+        );
+        
+        setTodos(updatedTodos);
+        toast.success('Subtask added successfully!');
+      } catch (error) {
+        console.error('Error adding subtask:', error);
+        toast.error('Failed to add subtask');
+      }
     }
   };
 
   // Toggle subtask completion
-  const toggleSubtask = (todoId, subtaskId) => {
-    const updatedTodos = todos.map(todo =>
-      todo.id === todoId
-        ? {
-          ...todo,
-          subtasks: todo.subtasks.map(subtask =>
-            subtask.id === subtaskId
-              ? { ...subtask, completed: !subtask.completed }
-              : subtask
-          )
-        }
-        : todo
-    );
-    
-    setTodos(updatedTodos);
+  const toggleSubtask = async (todoId, subtaskId) => {
+    try {
+      const response = await api.patch(`/tasks/${todoId}/subtasks/${subtaskId}/toggle`);
+      const updatedTodos = todos.map(todo =>
+        todo._id === todoId ? response.data : todo
+      );
+      
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error('Error toggling subtask:', error);
+      toast.error('Failed to update subtask');
+    }
   };
 
   // Delete a subtask
-  const deleteSubtask = (todoId, subtaskId) => {
-    const updatedTodos = todos.map(todo =>
-      todo.id === todoId
-        ? {
-          ...todo,
-          subtasks: todo.subtasks.filter(subtask => subtask.id !== subtaskId)
-        }
-        : todo
-    );
-    
-    setTodos(updatedTodos);
+  const deleteSubtask = async (todoId, subtaskId) => {
+    try {
+      const response = await api.delete(`/tasks/${todoId}/subtasks/${subtaskId}`);
+      const updatedTodos = todos.map(todo =>
+        todo._id === todoId ? response.data : todo
+      );
+      
+      setTodos(updatedTodos);
+      toast.success('Subtask deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting subtask:', error);
+      toast.error('Failed to delete subtask');
+    }
   };
 
   // Apply advanced filters
@@ -521,7 +561,7 @@ const TodoHome = () => {
         (todo.category && todo.category.toLowerCase().includes(searchQuery.toLowerCase()))
       )
       .sort((a, b) => {
-        if (sortBy === 'date') return new Date(b.date) - new Date(a.date);
+        if (sortBy === 'date') return new Date(b.createdAt) - new Date(a.createdAt);
         if (sortBy === 'priority') {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           return priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -599,7 +639,21 @@ const TodoHome = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 theme-${theme}`} style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <div className=" ">
+      <div className="relative">
+        {/* Toast Container for notifications */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme={theme === 'dark' ? 'dark' : 'light'}
+        />
+
         {/* <Header 
           theme={theme}
           setTheme={setTheme}
@@ -625,9 +679,7 @@ const TodoHome = () => {
           />
         )} */}
 
-        <div className="flex flex-col lg:flex-row gap-6">
-
-
+        <div className="flex flex-col lg:flex-row gap-0">
           <Sidebar 
             sidebarCollapsed={sidebarCollapsed}
             setSidebarCollapsed={setSidebarCollapsed}
@@ -639,11 +691,9 @@ const TodoHome = () => {
             setSelectedCategory={setSelectedCategory}
           />
 
-        <div className={`w-full ${sidebarCollapsed ? 'lg:w-[calc(100%-80px)]' : 'lg:w-3/4'} transition-all duration-300`}>
+          <div className={`w-full ${sidebarCollapsed ? 'lg:w-[calc(100%-80px)]' : 'lg:w-3/4'} transition-all duration-300`}>
             
-
-
-        <Header 
+                    <Header 
           theme={theme}
           setTheme={setTheme}
           showPomodoro={showPomodoro}
@@ -667,7 +717,6 @@ const TodoHome = () => {
             setShowPomodoro={setShowPomodoro}
           />
         )}
-
             
             <TodoList 
               todos={todos}
@@ -693,6 +742,7 @@ const TodoHome = () => {
               getPriorityIcon={getPriorityIcon}
               getCategoryIcon={getCategoryIcon}
               isOverdue={isOverdue}
+              loading={loading}
             />
           </div>
         </div>

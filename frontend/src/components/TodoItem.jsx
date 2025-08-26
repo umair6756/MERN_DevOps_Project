@@ -1,359 +1,3 @@
-// import React from 'react';
-// import { motion } from 'framer-motion';
-// import { 
-//   FiCheckSquare, FiSquare, FiStar, FiEdit, 
-//   FiTrash2, FiFlag, FiCalendar, FiTag, 
-//   FiClock, FiZap, FiLock, FiPaperclip, 
-//   FiUser, FiReminder, FiRepeat 
-// } from '../icons/icons';
-
-// import '../App.css'
-
-// const TodoItem = ({
-//   todo,
-//   toggleComplete,
-//   toggleFavorite,
-//   startEdit,
-//   deleteTodo,
-//   toggleSubtask,
-//   getPriorityIcon,
-//   getCategoryIcon,
-//   isOverdue,
-//   viewMode = 'list'
-// }) => {
-//   const priorityInfo = getPriorityIcon(todo.priority);
-//   const categoryInfo = getCategoryIcon(todo.category);
-  
-//   if (viewMode === 'list') {
-//     return (
-// <motion.div
-//   layout
-//   initial={{ opacity: 0, y: 20 }}
-//   animate={{ opacity: 1, y: 0 }}
-//   exit={{ opacity: 0, height: 0 }}
-//   transition={{ duration: 0.2 }}
-//   className={`card rounded-2xl p-5 shadow-md ${todo.completed ? 'opacity-70' : ''}`}
-//   style={{background: 'var(--card)'}}
-// >
-//   <div className="flex items-start gap-4">
-//     <button
-//       onClick={() => toggleComplete(todo.id)}
-//       className={`mt-1 p-2 rounded-full ${todo.completed ? 'text-green-600' : 'text-gray-400'}`}
-//       style={{
-//         background: todo.completed ? 'var(--accent)' : 'var(--input)',
-//         color: todo.completed ? 'white' : 'var(--text)'
-//       }}
-//     >
-//       {todo.completed ? <FiCheckSquare size={18} /> : <FiSquare size={18} />}
-//     </button>
-    
-//     <div className="flex-1">
-//       <div className="flex flex-wrap items-center gap-2 mb-2">
-//         <span className={`font-medium ${todo.completed ? 'line-through' : ''}`} style={{color: 'var(--text)'}}>
-//           {todo.text}
-//         </span>
-        
-//         {todo.isPrivate && (
-//           <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1" style={{background: 'var(--input)', color: 'var(--accent)'}}>
-//             <FiLock size={10} /> Private
-//           </span>
-//         )}
-        
-//         {todo.isFavorite && (
-//           <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1" style={{background: 'var(--input)', color: 'var(--accent)'}}>
-//             <FiStar size={10} /> Favorite
-//           </span>
-//         )}
-
-//         {todo.reminderTime && (
-//           <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1" style={{background: 'var(--input)', color: 'var(--accent)'}}>
-//             <FiReminder size={10} /> Reminder
-//           </span>
-//         )}
-
-//         {todo.recurring !== 'none' && (
-//           <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1" style={{background: 'var(--input)', color: 'var(--accent)'}}>
-//             <FiRepeat size={10} /> {todo.recurring}
-//           </span>
-//         )}
-//       </div>
-      
-//       {todo.notes && (
-//         <div className="text-sm opacity-75 mb-3 p-3 rounded-lg" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//           {todo.notes}
-//         </div>
-//       )}
-      
-//       <div className="flex flex-wrap items-center gap-3 text-sm">
-//         <div className={`flex items-center gap-1 px-2 py-1 rounded-full`} style={{background: 'var(--input)', color: 'var(--text)'}}>
-//           <FiFlag style={{color: 'var(--accent)'}} />
-//           <span className="capitalize">{todo.priority}</span>
-//         </div>
-        
-//         {todo.dueDate && (
-//           <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${isOverdue(todo.dueDate) && !todo.completed ? 'text-red-500' : ''}`} style={{background: 'var(--input)'}}>
-//             <FiCalendar size={14} style={{color: 'var(--accent)'}} />
-//             <span>{new Date(todo.dueDate).toLocaleDateString()}</span>
-//           </div>
-//         )}
-        
-//         {todo.tag && (
-//           <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//             <FiTag size={14} style={{color: 'var(--accent)'}} />
-//             <span>{todo.tag}</span>
-//           </div>
-//         )}
-        
-//         {todo.category && (
-//           <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//             {React.createElement(categoryInfo.icon, {style: {color: 'var(--accent)'}})}
-//             <span>{todo.category}</span>
-//           </div>
-//         )}
-
-//         {todo.estimatedTime > 0 && (
-//           <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//             <FiClock size={14} style={{color: 'var(--accent)'}} />
-//             <span>{todo.estimatedTime}m</span>
-//           </div>
-//         )}
-
-//         <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//           <FiZap size={14} style={{color: 'var(--accent)'}} />
-//           <span>Energy: {todo.energyRequired}/5</span>
-//         </div>
-//       </div>
-      
-//       {/* Subtasks */}
-//       {todo.subtasks && todo.subtasks.length > 0 && (
-//         <div className="mt-4 pt-4" style={{borderColor: 'var(--accent)'}}>
-//           <div className="text-xs font-medium mb-2 uppercase tracking-wide" style={{color: 'var(--text)'}}>
-//             Subtasks ({todo.subtasks.filter(st => st.completed).length}/{todo.subtasks.length})
-//           </div>
-//           <div className="space-y-2">
-//             {todo.subtasks.map(subtask => (
-//               <div key={subtask.id} className="flex items-center gap-2">
-//                 <button
-//                   onClick={() => toggleSubtask(todo.id, subtask.id)}
-//                   className={`p-1 rounded-full ${subtask.completed ? 'text-green-600' : 'text-gray-400'}`}
-//                   style={{
-//                     background: subtask.completed ? 'var(--accent)' : 'var(--input)',
-//                     color: subtask.completed ? 'white' : 'var(--text)'
-//                   }}
-//                 >
-//                   {subtask.completed ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
-//                 </button>
-//                 <span className={`text-sm ${subtask.completed ? 'line-through opacity-70' : ''}`} style={{color: 'var(--text)'}}>
-//                   {subtask.text}
-//                 </span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-
-//       {/* Attachments */}
-//       {todo.attachments && todo.attachments.length > 0 && (
-//         <div className="mt-4 pt-4" style={{borderColor: 'var(--accent)'}}>
-//           <div className="text-xs font-medium mb-2 uppercase tracking-wide" style={{color: 'var(--text)'}}>
-//             Attachments ({todo.attachments.length})
-//           </div>
-//           <div className="flex flex-wrap gap-2">
-//             {todo.attachments.map((attachment, index) => (
-//               <div key={index} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//                 <FiPaperclip size={12} style={{color: 'var(--accent)'}} />
-//                 <span>{attachment.name}</span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-
-//       {/* Collaborators */}
-//       {todo.collaborators && todo.collaborators.length > 0 && (
-//         <div className="mt-4 pt-4" style={{borderColor: 'var(--accent)'}}>
-//           <div className="text-xs font-medium mb-2 uppercase tracking-wide" style={{color: 'var(--text)'}}>
-//             Collaborators ({todo.collaborators.length})
-//           </div>
-//           <div className="flex flex-wrap gap-2">
-//             {todo.collaborators.map((collaborator, index) => (
-//               <div key={index} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//                 <FiUser size={12} style={{color: 'var(--accent)'}} />
-//                 <span>{collaborator}</span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-    
-//     <div className="flex flex-col gap-2">
-//       <button
-//         onClick={() => toggleFavorite(todo.id)}
-//         className="p-2 rounded-lg transition-colors"
-//         style={{
-//           background: 'var(--input)',
-//           color: todo.isFavorite ? 'var(--accent)' : 'var(--text)'
-//         }}
-//       >
-//         {todo.isFavorite ? (
-//           <FiStar className="text-yellow-500" />
-//         ) : (
-//           <FiStar />
-//         )}
-//       </button>
-      
-//       <button
-//         onClick={() => startEdit(todo)}
-//         className="p-2 rounded-lg transition-colors"
-//         style={{background: 'var(--input)', color: 'var(--text)'}}
-//       >
-//         <FiEdit size={16} />
-//       </button>
-      
-//       <button
-//         onClick={() => deleteTodo(todo.id)}
-//         className="p-2 rounded-lg transition-colors"
-//         style={{background: 'var(--input)', color: 'var(--text)'}}
-//       >
-//         <FiTrash2 size={16} />
-//       </button>
-//     </div>
-//   </div>
-// </motion.div>
-// );
-// } else {
-// // Grid view
-// return (
-// <motion.div
-//   layout
-//   initial={{ opacity: 0, scale: 0.9 }}
-//   animate={{ opacity: 1, scale: 1 }}
-//   exit={{ opacity: 0, scale: 0.9 }}
-//   transition={{ duration: 0.2 }}
-//   className={`card rounded-2xl p-5 shadow-md ${todo.completed ? 'opacity-70' : ''}`}
-//   style={{background: 'var(--card)'}}
-// >
-//   <div className="flex justify-between items-start mb-4">
-//     <button
-//       onClick={() => toggleComplete(todo.id)}
-//       className={`p-2 rounded-full ${todo.completed ? 'text-green-600' : 'text-gray-400'}`}
-//       style={{
-//         background: todo.completed ? 'var(--accent)' : 'var(--input)',
-//         color: todo.completed ? 'white' : 'var(--text)'
-//       }}
-//     >
-//       {todo.completed ? <FiCheckSquare size={18} /> : <FiSquare size={18} />}
-//     </button>
-    
-//     <div className="flex gap-1">
-//       <button
-//         onClick={() => toggleFavorite(todo.id)}
-//         className="p-2 rounded-lg transition-colors"
-//         style={{
-//           background: 'var(--input)',
-//           color: todo.isFavorite ? 'var(--accent)' : 'var(--text)'
-//         }}
-//       >
-//         {todo.isFavorite ? (
-//           <FiStar className="text-yellow-500" size={16} />
-//         ) : (
-//           <FiStar size={16} />
-//         )}
-//       </button>
-      
-//       <button
-//         onClick={() => startEdit(todo)}
-//         className="p-2 rounded-lg transition-colors"
-//         style={{background: 'var(--input)', color: 'var(--text)'}}
-//       >
-//         <FiEdit size={16} />
-//       </button>
-//     </div>
-//   </div>
-  
-//   <div className="mb-4">
-//     <h3 className={`font-medium mb-2 ${todo.completed ? 'line-through' : ''}`} style={{color: 'var(--text)'}}>
-//       {todo.text}
-//     </h3>
-    
-//     {todo.notes && (
-//       <p className="text-sm opacity-75 line-clamp-2 p-2 rounded-lg" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//         {todo.notes}
-//       </p>
-//     )}
-//   </div>
-  
-//   <div className="space-y-2 mb-4 text-sm">
-//     <div className={`flex items-center gap-2 px-2 py-1 rounded-full`} style={{background: 'var(--input)', color: 'var(--text)'}}>
-//       <FiFlag style={{color: 'var(--accent)'}} />
-//       <span className="capitalize">{todo.priority} priority</span>
-//     </div>
-    
-//     {todo.dueDate && (
-//       <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${isOverdue(todo.dueDate) && !todo.completed ? 'text-red-500' : ''}`} style={{background: 'var(--input)'}}>
-//         <FiCalendar size={14} style={{color: 'var(--accent)'}} />
-//         <span>{new Date(todo.dueDate).toLocaleDateString()}</span>
-//       </div>
-//     )}
-    
-//     {todo.category && (
-//       <div className={`flex items-center gap-2 px-2 py-1 rounded-full`} style={{background: 'var(--input)', color: 'var(--text)'}}>
-//         {React.createElement(categoryInfo.icon, {style: {color: 'var(--accent)'}})}
-//         <span>{todo.category}</span>
-//       </div>
-//     )}
-
-//     {todo.estimatedTime > 0 && (
-//       <div className="flex items-center gap-2 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//         <FiClock size={14} style={{color: 'var(--accent)'}} />
-//         <span>{todo.estimatedTime}m estimate</span>
-//       </div>
-//     )}
-
-//     <div className="flex items-center gap-2 px-2 py-1 rounded-full" style={{background: 'var(--input)', color: 'var(--text)'}}>
-//       <FiZap size={14} style={{color: 'var(--accent)'}} />
-//       <span>Energy: {todo.energyRequired}/5</span>
-//     </div>
-//   </div>
-  
-//   {todo.subtasks && todo.subtasks.length > 0 && (
-//     <div className="mb-4">
-//       <div className="text-xs font-medium mb-1 uppercase tracking-wide" style={{color: 'var(--text)'}}>
-//         Subtasks ({todo.subtasks.filter(st => st.completed).length}/{todo.subtasks.length})
-//       </div>
-//       <div className="w-full rounded-full h-2" style={{background: 'var(--input)'}}>
-//         <div 
-//           className="h-2 rounded-full transition-all duration-500"
-//           style={{ 
-//             width: `${(todo.subtasks.filter(st => st.completed).length / todo.subtasks.length) * 100}%`,
-//             background: 'var(--accent)'
-//           }}
-//         ></div>
-//       </div>
-//     </div>
-//   )}
-  
-//   <div className="flex justify-between items-center text-xs" style={{color: 'var(--text)'}}>
-//     <div>
-//       {new Date(todo.date).toLocaleDateString()}
-//     </div>
-    
-//     {todo.isPrivate && (
-//       <div className="flex items-center gap-1">
-//         <FiLock size={12} style={{color: 'var(--accent)'}} />
-//         <span>Private</span>
-//       </div>
-//     )}
-//   </div>
-// </motion.div>
-//     );
-//   }
-// };
-
-// export default TodoItem;
-
-
 
 
 
@@ -450,7 +94,7 @@ const TodoItem = ({
           {/* Checkbox with nice animation */}
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => toggleComplete(todo.id)}
+            onClick={() => toggleComplete(todo._id)}
             className={`mt-1 p-2 rounded-full transition-all duration-200 ${todo.completed ? 'text-green-600' : 'text-gray-400 hover:scale-110'}`}
             style={{
               background: todo.completed ? 'var(--accent)' : 'var(--input)',
@@ -624,7 +268,7 @@ const TodoItem = ({
                       whileHover={{ x: 5 }}
                     >
                       <button
-                        onClick={() => toggleSubtask(todo.id, subtask.id)}
+                        onClick={() => toggleSubtask(todo._id, subtask._id)}
                         className={`p-1.5 rounded-full flex-shrink-0 ${subtask.completed ? 'text-green-600' : 'text-gray-400'}`}
                         style={{
                           background: subtask.completed ? 'var(--accent)' : 'var(--input)',
@@ -722,7 +366,7 @@ const TodoItem = ({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => toggleFavorite(todo.id)}
+                onClick={() => toggleFavorite(todo._id)}
                 className="p-2.5 rounded-xl transition-all duration-200"
                 style={{
                   background: 'var(--input)',
@@ -747,7 +391,7 @@ const TodoItem = ({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => deleteTodo(todo.id)}
+                onClick={() => deleteTodo(todo._id)}
                 className="p-2.5 rounded-xl transition-all duration-200"
                 style={{background: 'var(--input)', color: 'var(--text)'}}
                 aria-label="Delete task"
@@ -777,7 +421,7 @@ const TodoItem = ({
                   style={{background: 'var(--card)'}}
                 >
                   <button
-                    onClick={() => { toggleFavorite(todo.id); setShowActions(false); }}
+                    onClick={() => { toggleFavorite(todo._id); setShowActions(false); }}
                     className="w-full px-4 py-2 text-left flex items-center gap-2 hover:opacity-80 transition-opacity"
                     style={{color: 'var(--text)'}}
                   >
@@ -834,7 +478,7 @@ const TodoItem = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className={`card rounded-2xl p-5 shadow-lg transition-all duration-300 ${todo.completed ? 'opacity-70' : 'hover:shadow-xl'} border border-opacity-10 h-full flex flex-col`}
+        className={` p-5  shadow-lg transition-all duration-300 ${todo.completed ? 'opacity-70' : 'hover:shadow-xl'} border border-opacity-10 h-full flex flex-col`}
         style={{
           background: 'var(--card)',
           borderColor: todo.completed ? 'var(--accent)' : 'var(--input)'
@@ -844,7 +488,7 @@ const TodoItem = ({
         <div className="flex justify-between items-start mb-4">
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => toggleComplete(todo.id)}
+            onClick={() => toggleComplete(todo._id)}
             className={`p-2.5 rounded-full transition-all duration-200 ${todo.completed ? 'text-green-600' : 'text-gray-400 hover:scale-110'}`}
             style={{
               background: todo.completed ? 'var(--accent)' : 'var(--input)',
@@ -858,7 +502,7 @@ const TodoItem = ({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => toggleFavorite(todo.id)}
+              onClick={() => toggleFavorite(todo._id)}
               className="p-2 rounded-lg transition-colors"
               style={{
                 background: 'var(--input)',
@@ -871,6 +515,18 @@ const TodoItem = ({
                 <FiStar size={16} />
               )}
             </motion.button>
+
+
+                          <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => deleteTodo(todo._id)}
+                className="p-2 rounded-lg transition-colors"
+                style={{background: 'var(--input)', color: 'var(--text)'}}
+                aria-label="Delete task"
+              >
+                <FiTrash2 size={18} />
+              </motion.button>
           </div>
         </div>
         

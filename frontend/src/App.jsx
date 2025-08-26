@@ -18,7 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<AuthPage/>} />
           <Route path="/home" element={<HomePage/>} />
-          <Route path="/todo" element={<TodoHome/>} />
+          <Route path="/task" element={<TodoHome/>} />
         </Routes>
       </Router>
     </>
