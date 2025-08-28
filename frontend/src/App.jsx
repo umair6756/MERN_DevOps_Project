@@ -5,7 +5,6 @@ import './App.css'
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
-import HomePage from './pages/HomePage';
 import TodoHome from './pages/TodoHome';
 
 
@@ -17,7 +16,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage/>} />
-          <Route path="/home" element={<HomePage/>} />
           <Route path="/task" element={<TodoHome/>} />
         </Routes>
       </Router>

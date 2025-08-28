@@ -1,2 +1,0 @@
-docker push umair6787/todo-frontend:latest
-docker push umair6787/todo-backend:latest
