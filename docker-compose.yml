@@ -15,7 +15,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/mydb
+      - MONGO_URI=mongodb://mongo:27017/MERN-Notes-App
+      - JWT_SECRET=H#7gL!qZ$39p@tD1vEw&kNmZ^PzLuQsXaT!gBcD^r
     depends_on:
       - mongo
     networks:
