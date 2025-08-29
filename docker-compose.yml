@@ -2,7 +2,7 @@
 
 services:
   frontend:
-    build: ./frontend
+    image: frontend-image:latest
     ports:
       - "3000:80"
     depends_on:
@@ -15,7 +15,7 @@ services:
         condition: on-failure
 
   backend:
-    build: ./backend
+    image: backend-image:latest
     ports:
       - "5000:5000"
     environment:
