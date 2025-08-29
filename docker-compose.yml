@@ -9,6 +9,10 @@ services:
       - backend
     networks:
       - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
 
   backend:
     build: ./backend
@@ -21,6 +25,10 @@ services:
       - mongo
     networks:
       - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
 
   mongo:
     image: mongo:6
@@ -31,10 +39,14 @@ services:
       - mongo_data:/data/db
     networks:
       - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
 
 volumes:
   mongo_data:
 
 networks:
   app-network:
-    driver: bridge
+    driver: overlay
